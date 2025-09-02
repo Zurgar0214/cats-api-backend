@@ -46,9 +46,9 @@ export class CatsController {
     return this.catsService.searchBreeds(query);
   }
 
-  @Get(':breed_id')
+  @Get('get_by_id')
   @ApiOperation({ summary: 'Get a single cat breed by ID' })
-  @ApiParam({
+  @ApiQuery({
     name: 'breed_id',
     required: true,
     description: 'The ID of the cat breed.',
@@ -59,7 +59,7 @@ export class CatsController {
     type: Cat,
   })
   @ApiResponse({ status: 404, description: 'Cat breed not found.' })
-  async getBreedById(@Param('breed_id') breedId: string): Promise<Cat> {
+  async getBreedById(@Query('breed_id') breedId: string): Promise<Cat> {
     return this.catsService.getBreedById(breedId);
   }
 }
