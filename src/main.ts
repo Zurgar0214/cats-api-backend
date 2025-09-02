@@ -1,32 +1,25 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { configure as serverlessExpress } from '@vendia/serverless-express';
 import { ValidationPipe } from '@nestjs/common';
-import { APIGatewayProxyEvent, Context } from 'aws-lambda';
+import { INestApplication } from '@nestjs/common';
+import { configure as serverlessExpress } from '@vendia/serverless-express';
 
-let cachedServer: any;
+export async function bootstrapServer() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe());
 
-async function bootstrapServer() {
-  if (!cachedServer) {
-    const nestApp = await NestFactory.create(AppModule);
-    nestApp.useGlobalPipes(new ValidationPipe());
-    
-    const config = new DocumentBuilder()
-      .setTitle('Xpert - Cats API')
-      .setDescription('This is a api to get information about cats breeds. Developed as a technical test for Xpert group.')
-      .setVersion('1.0')
-      .build();
-    const document = SwaggerModule.createDocument(nestApp, config);
-    SwaggerModule.setup('api', nestApp, document);
+  const config = new DocumentBuilder()
+    .setTitle('Xpert - Cats API')
+    .setDescription(
+      'This is an API to get information about cats breeds. Developed for Xpert group.'
+    )
+    .setVersion('1.0')
+    .build();
 
-    await nestApp.init();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
-    cachedServer = serverlessExpress({ app: nestApp.getHttpAdapter().getInstance() });
-  }
-  return cachedServer;
+  await app.init();
+  return serverlessExpress({ app: app.getHttpAdapter().getInstance() });
 }
-
-export const handler = async (event: APIGatewayProxyEvent, context: Context) => {
-  return bootstrapServer().then(server => server(event, context));
-};

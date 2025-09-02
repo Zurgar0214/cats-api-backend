@@ -2,10 +2,9 @@ FROM public.ecr.aws/lambda/nodejs:18
 
 WORKDIR /var/task
 
-COPY . .
-
-RUN npm install
+COPY package*.json ./
+RUN npm install --production
 
 COPY dist ./dist
 
-CMD ["dist/main.handler"]
+CMD ["dist/lambda.handler"]

@@ -6,6 +6,10 @@ import { User as UserEntity } from '../../domain/entities/user.entity';
 
 @Injectable()
 export class UserRepository {
+  async findAll(): Promise<UserEntity[]> {
+    const userDocs = await this.userModel.find().exec();
+    return userDocs.map(doc => this.toDomain(doc));
+  }
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(user: User): Promise<UserEntity> {

@@ -1,3 +1,4 @@
+import { UserListDto } from '../domain/dto/user-list.dto';
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { UserRepository } from '../infrastructure/repositories/user.repository';
 import { User } from '../domain/entities/user.entity';
@@ -7,7 +8,16 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   constructor(private readonly userRepository: UserRepository) {}
-
+  
+  async getAllUsers(): Promise<UserListDto[]> {
+    const users = await this.userRepository.findAll();
+    return users.map(user => ({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+    }));
+  }
+  
   async registerUser(registerUserDto: RegisterUserDto): Promise<User> {
     const existingUser = await this.userRepository.findOneByEmail(registerUserDto.email);
     if (existingUser) {
